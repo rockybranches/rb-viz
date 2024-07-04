@@ -1,0 +1,3 @@
+open3d
+
+git+https://github.com/rocapp/Open3D-ML/archive/refs/tags/v0.18.0.tar.gz
