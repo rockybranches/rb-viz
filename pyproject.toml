@@ -25,5 +25,14 @@ dev = [
     "numpy>=2.4.6",
     "pandas>=3.0.3",
     "plotly>=6.8.0",
+    "rb-rimrock[plots]",
     "scipy>=1.17.1",
 ]
+
+[tool.uv]
+# rb-rimrock needs Python >= 3.12
+environments = ["python_version >= '3.12'"]
+
+[tool.uv.sources]
+# private repo; pinned to the commit the notebook was written against (rb-rimrock PR #2)
+rb-rimrock = { git = "https://github.com/rockybranches/rb-rimrock", rev = "3856650970b0bb4281a6518fc4af483b3a598dd4" }
