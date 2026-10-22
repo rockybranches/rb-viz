@@ -1,0 +1,15 @@
+# Python / Jupyter
+.venv/
+__pycache__/
+.ipynb_checkpoints/
+
+# Rimrock data stays out of this public repository
+*.xls
+*.xlsx
+*.csv
+*.shp
+*.shx
+*.dbf
+*.prj
+*.cpg
+output/
