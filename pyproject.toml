@@ -34,5 +34,5 @@ dev = [
 environments = ["python_version >= '3.12'"]
 
 [tool.uv.sources]
-# private repo; pinned to the commit the notebook was written against (rb-rimrock PR #2)
-rb-rimrock = { git = "https://github.com/rockybranches/rb-rimrock", rev = "3856650970b0bb4281a6518fc4af483b3a598dd4" }
+# private repo; pinned to main after rb-rimrock PR #2 was merged
+rb-rimrock = { git = "https://github.com/rockybranches/rb-rimrock", rev = "2ee7d478e593a9f374f5509b4bc9bcba4a6d2890" }
