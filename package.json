@@ -1,0 +1,25 @@
+{
+  "name": "@rockybranches/rb-viz",
+  "version": "0.2.0",
+  "description": "Shared data visualization components for rockybranches projects",
+  "type": "module",
+  "main": "dist/rb-viz.esm.js",
+  "exports": {
+    ".": "./js/index.js",
+    "./css": "./dist/rb-viz.css",
+    "./*": "./js/*"
+  },
+  "files": ["js", "css", "dist"],
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "check": "node scripts/build.mjs --check",
+    "test": "node --test \"js/test/*.test.js\"",
+    "gallery": "node scripts/serve.mjs"
+  },
+  "repository": "github:rockybranches/rb-viz",
+  "devDependencies": {
+    "esbuild": "^0.25.0",
+    "leaflet": "1.9.4",
+    "plotly.js-dist-min": "2.35.2"
+  }
+}

@@ -1,26 +1,134 @@
 rb-viz
 ======
 
-Visualization notebooks.
+The shared data visualization components of the rockybranches projects: one set of colours, charts,
+maps and page blocks, so that a strip log or a correlation matrix looks and behaves the same in
+[rb-rimrock](https://github.com/rockybranches/rb-rimrock), rb-assay, rb-road-network and in a notebook.
 
-## Rimrock (`notebooks/rimrock.ipynb`)
+It has two halves that share one colour definition (`src/rb_viz/tokens.json`):
 
-Au-Cu prospect, western Sheep Creek Range, Nevada. The notebook uses the
-[`rb-rimrock`](https://github.com/rockybranches/rb-rimrock) package (private; pinned in
-`pyproject.toml` under `[tool.uv.sources]`) to import the drill logs, compute the per-sample and
-per-hole Au weights, the surface-soil R², the sensitivity to β and to the depth-gap policy, and
-a map of the holes and soil clusters.
+| | For | Lives in | Needs |
+|---|---|---|---|
+| **JavaScript + CSS** | web apps and generated dashboards | `js/`, `css/`, built into `dist/` | Plotly 2.x for charts, Leaflet 1.9 for maps (loaded by the page, not bundled) |
+| **Python** (`rb_viz`) | notebooks, reports, static images | `src/rb_viz/` | matplotlib; Plotly and folium as extras |
 
-The data is **not** in this repository. Point the notebook at it, then start Jupyter:
+To see every JavaScript component drawn with made-up data, in both themes:
 
 ```bash
-uv sync
+npm install
+npm run gallery        # then open http://localhost:8765/examples/
+```
+
+## What is in it
+
+### JavaScript (`js/`)
+
+| Module | Components |
+|---|---|
+| `charts/striplog.js` | `stripLog` (lithology bands and value tracks against depth), `onDepthPick`, `stepSeries`, `intervalAt`, `categoryShares` |
+| `charts/heatmaps.js` | `correlationHeatmap`, `matrixHeatmap`, `scoresMatrix` |
+| `charts/bars.js` | `rankedBars` |
+| `charts/scatter.js` | `crossPlot`, `planView`, `lineOverlay` (e.g. diffractograms) |
+| `charts/distribution.js` | `logHistogram` |
+| `charts/holes3d.js` | `holes3d`, `traceOffset`, `surfaceTrace` |
+| `maps/leaflet.js` | `addBasemaps` (OpenStreetMap, USGS topo, imagery), `legendControl`, `buttonControl`, `labeledPin`, `imageOverlay` |
+| `maps/layers.js` | `gradedPoints` (samples coloured by grade), `collarTraces` (drill collars and hole traces), `bandedArea` (reachable area in distance bands) |
+| `maps/png.js` | `renderMapPng`, `downloadMapPng` (the map on screen as an image) |
+| `widgets/lightbox.js` | `gallery`, `openLightbox` |
+| `widgets/blocks.js` | `statTiles`, `compositionBar`, `dataTable` (sort, filter, row click) |
+| `plotting.js` | `draw`, `onPointClick`, `showEmpty`, `baseLayout`, `axis` |
+| `theme.js`, `colors.js`, `format.js` | themes and the light/dark switch, palettes and colour scales, number and text formatting |
+
+Chart functions return a plain `{ data, layout, config }` object and `draw()` puts it on the page, so
+charts can be tested without a browser:
+
+```html
+<link rel="stylesheet" href="rb-viz.css">
+<script src="https://cdn.jsdelivr.net/npm/plotly.js-dist-min@2.35.2/plotly.min.js"></script>
+<div id="strip" class="plot" style="height:640px"></div>
+<script type="module">
+  import { draw, stripLog, onDepthPick, lithologyColor } from "./rb-viz.esm.js";
+
+  draw("strip", stripLog([
+    { type: "category", title: "Lithology", color: lithologyColor,
+      intervals: [{ from: 0, to: 40, label: "Shale" }, { from: 40, to: 100, label: "Chert" }] },
+    { type: "value", title: "Au (g/t)", name: "Au", log: true,
+      intervals: [{ from: 0, to: 5, value: 0.02 }, { from: 5, to: 10, value: 1.4 }] },
+  ], { depthTitle: "Depth (ft)" }));
+  onDepthPick("strip", (depth) => console.log("picked", depth));
+</script>
+```
+
+Three ways to use it from another project:
+
+- **A page with a build step or ES modules:** import from `js/index.js` (or one module, e.g. `js/charts/striplog.js`).
+- **A static page:** copy `dist/rb-viz.esm.js` (module) or `dist/rb-viz.js` (classic script; everything is under the global `RBViz`) and `dist/rb-viz.css` next to the page.
+- **A single generated HTML file** (as rb-assay writes): inline `dist/rb-viz.js` and `dist/rb-viz.css`.
+
+`dist/rb-viz.css` holds the colour tokens for light and dark, the page blocks (cards, tiles, chips,
+tables, hole pages, galleries) and the map styles. Charts read their colours from it when they are
+drawn; after switching theme, draw them again (`bindThemeToggle(button, { onChange: redraw })`).
+
+Text you pass in (labels, titles, names) is escaped. The few options documented as HTML (`popup`,
+a table column's `cell`, a lightbox `caption` function) are inserted as given: escape them with `esc()`.
+
+### Python (`src/rb_viz/`)
+
+```bash
+uv add "rb-viz[all] @ git+https://github.com/rockybranches/rb-viz"   # or [plotly], [maps], or no extra
+```
+
+| Module | Contents |
+|---|---|
+| `rb_viz.palette` | `SERIES`, `SEQUENTIAL`, `CATEGORICAL`, `BANDS`, `LITHOLOGY`, `theme()`, `categorical_colors()`, `lithology_color()`, `sampled_colors()` |
+| `rb_viz.style` | `use_style()` / `matplotlib_rc()`, `sequential_cmap()`, `diverging_cmap()`, `plotly_template()` |
+| `rb_viz.figures` | matplotlib: `strip_log`, `depth_profiles`, `ranked_bars`, `line_series`, `correlation_heatmap` |
+| `rb_viz.interactive` | Plotly: `stacked_share_bars`, `share_pie`, `correlation_heatmap`, `ranked_bars` |
+| `rb_viz.maps` | folium: `cluster_marker_map` (markers with image popups over clustered surface samples) |
+
+```python
+import pandas as pd
+from rb_viz import figures
+
+fig = figures.ranked_bars(pd.Series({"As": 0.41, "Sb": 0.37, "Hg": 0.12}), xlabel="R² with Au", annotate_from=0.1)
+fig.savefig("r2.png")
+```
+
+Figure functions take data and return a figure; they do not read or write files or change global
+plotting settings. In Jupyter, end the line with `;` (or assign the figure) so it is not shown twice.
+
+## Notebooks
+
+`notebooks/rimrock.ipynb`: the Au-Cu prospect in the western Sheep Creek Range, Nevada. It uses the
+private [`rb-rimrock`](https://github.com/rockybranches/rb-rimrock) package for the analysis and
+`rb_viz` for the figures. The data is **not** in this repository:
+
+```bash
+uv sync --group notebooks
 RIMROCK_LOGS_DIR=~/rimrock/logs \
 RIMROCK_SOIL_SHP=~/rimrock/soils/rimrock_surface_data.shp \
 RIMROCK_LOCATIONS_FILE_PATH=~/rimrock/Rimrock_Drill_hole_data_Location.csv \
 uv run jupyter lab notebooks/rimrock.ipynb
 ```
 
-This repository is public: commit the notebook with its outputs cleared
-(`uv run jupyter nbconvert --clear-output --inplace notebooks/rimrock.ipynb`). `.gitignore`
-keeps spreadsheets, CSVs and shapefiles out.
+This repository is public: commit notebooks with their outputs cleared
+(`uv run jupyter nbconvert --clear-output --inplace notebooks/rimrock.ipynb`). `.gitignore` keeps
+spreadsheets, CSVs and shapefiles out.
+
+## Working on rb-viz
+
+```bash
+npm install && uv sync
+
+npm test               # JavaScript: chart specs, scales, formatting
+uv run pytest          # Python: figures, palettes, and that js/ and css/ match tokens.json
+npm run build          # regenerate js/tokens.js, css/tokens.css and dist/
+npm run check          # fails if the committed generated files are out of date
+```
+
+- **Changing a colour:** edit `src/rb_viz/tokens.json`, then `npm run build`. Do not edit
+  `js/tokens.js` or `css/tokens.css`; they are generated.
+- **Changing JavaScript or CSS:** run `npm run build` and commit `dist/` with the change, since
+  other projects copy the files from there.
+- **Adding a component:** add it to the gallery (`examples/`) too, and look at it in both themes
+  and at phone width.
