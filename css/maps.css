@@ -1,0 +1,35 @@
+/* rb-viz maps: Leaflet containers, labels, legends and controls. */
+.rbv-map, #map { height: 480px; border-radius: 10px; z-index: 0; }
+.leaflet-popup-content { font: 13px/1.45 system-ui, sans-serif; }
+.leaflet-container { background: var(--surface-2); }
+
+/* the name of a point (a drill collar), on a dark chip beside its marker */
+.pt-label, .hole-label {
+  background: var(--header); color: #fff; font-weight: 700; font-size: 12px; border-radius: 6px;
+  padding: 1px 6px; border: 1px solid rgba(255,255,255,.6); white-space: nowrap;
+}
+
+/* the name of a site next to its pin: plain haloed text. Map tiles are light in both colour
+   schemes, so these colours are fixed. renderMapPng() redraws this label and reads its font here. */
+.leaflet-tooltip.site-label {
+  max-width: 320px; overflow: hidden; text-overflow: ellipsis; padding: 0; border: 0; background: none;
+  box-shadow: none; color: #111; font: 700 14px/1.3 system-ui, -apple-system, "Segoe UI", sans-serif;
+  text-shadow: -1.5px 0 #fff, 1.5px 0 #fff, 0 -1.5px #fff, 0 1.5px #fff,
+    -1px -1px #fff, 1px -1px #fff, -1px 1px #fff, 1px 1px #fff;
+}
+.leaflet-tooltip.site-label::before { display: none; }
+
+.map-legend {
+  background: var(--surface); color: var(--ink); padding: 6px 10px; border-radius: 8px;
+  border: 1px solid var(--border); box-shadow: 0 1px 4px rgb(0 0 0 / 30%); font: 12px/1.5 system-ui, sans-serif;
+}
+.map-legend strong { display: block; margin-bottom: 2px; }
+.map-legend i { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; vertical-align: -1px; }
+.map-legend i.square { width: 12px; height: 12px; border-radius: 2px; }
+
+.map-button {
+  font: 600 13px system-ui, sans-serif; padding: 6px 10px; border-radius: 8px; cursor: pointer;
+  background: var(--surface); color: var(--ink); border: 1px solid var(--border); box-shadow: 0 1px 4px rgb(0 0 0 / 30%);
+}
+.map-button:hover { background: var(--surface-2); }
+.map-button[hidden] { display: none; }

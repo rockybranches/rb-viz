@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>rb-viz component gallery</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%231c5cab'/%3E%3Cpath d='M6 24 13 10l4 7 3-4 6 11z' fill='%23fab219'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="../node_modules/leaflet/dist/leaflet.css">
+  <link rel="stylesheet" href="../dist/rb-viz.css">
+  <script>
+    try { const t = localStorage.getItem("rb-viz-gallery-theme"); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
+  </script>
+  <style>
+    section[id] { scroll-margin-top: 72px; }
+    .gallery-section { margin-top: 34px; }
+    .gallery-section > h2 { margin-bottom: 4px; }
+    .gallery-section > .lead { color: var(--ink-2); max-width: 80ch; margin-bottom: 14px; }
+    .swatches { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0 14px; }
+    .swatches span { width: 44px; height: 30px; border-radius: 6px; border: 1px solid var(--border); }
+    .swatch-row { font-size: .82rem; color: var(--ink-2); }
+    code { font-size: .86em; background: var(--surface-2); padding: 1px 5px; border-radius: 4px; }
+    .rbv-map { height: 420px; }
+    button.chip:disabled { opacity: .5; cursor: default; }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="#top">
+      <svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="7" fill="#1c5cab"/><path d="M6 24 13 10l4 7 3-4 6 11z" fill="#fab219"/></svg>
+      <span><strong>rb-viz</strong><small>Component gallery · made-up data</small></span>
+    </a>
+    <nav id="nav" aria-label="Sections">
+      <a href="#palette">Colours</a><a href="#blocks">Blocks</a><a href="#hole">Drill hole</a>
+      <a href="#geochem">Geochemistry</a><a href="#space">3D &amp; plan</a><a href="#maps">Maps</a><a href="#images">Images</a>
+    </nav>
+    <button id="theme" class="icon-btn" type="button" title="Toggle light/dark" aria-label="Dark theme">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 1 0 9 9 7 7 0 0 1-9-9z" fill="currentColor"/></svg>
+    </button>
+  </header>
+
+  <main id="top">
+    <section class="hero">
+      <div>
+        <div class="eyebrow">rockybranches · shared visualization</div>
+        <h1>Every chart, map and widget in one place</h1>
+        <p class="lead">Each block below is one rb-viz component drawn with made-up data. Use it to see what exists
+          before building a page, and to check a change in both themes (moon button, top right).</p>
+      </div>
+      <div id="tiles"></div>
+    </section>
+
+    <section id="palette" class="gallery-section">
+      <h2>Colours</h2>
+      <p class="lead">Set once in <code>src/rb_viz/tokens.json</code>; the CSS, JavaScript and Python all read from it.</p>
+      <div class="card" id="swatches"></div>
+    </section>
+
+    <section id="blocks" class="gallery-section">
+      <h2>Page blocks</h2>
+      <p class="lead">Composition bar and a table that sorts, filters and opens rows.</p>
+      <div class="grid cols-2">
+        <div class="card"><h3>compositionBar</h3><div id="lithbar"></div></div>
+        <div class="card">
+          <div class="card-head"><h3>dataTable</h3><input type="search" id="filter" placeholder="Filter samples" aria-label="Filter samples"></div>
+          <div class="table-wrap" style="max-height:260px;overflow-y:auto"><table id="table"></table></div>
+          <p class="note" id="table-note"></p><p class="note" id="table-picked">Click a heading to sort, a row to pick it.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="hole" class="gallery-section">
+      <h2>Drill hole</h2>
+      <p class="lead"><code>stripLog</code>: lithology bands and assay tracks against depth. Click a depth to select it.</p>
+      <div class="hole-layout">
+        <div class="card">
+          <div class="controls"><label><input type="checkbox" id="logx" checked> Log scale</label></div>
+          <div id="strip" class="plot" style="height:640px"></div>
+        </div>
+        <aside class="sticky stack">
+          <div class="card" id="detail"><p class="muted">Select a depth on the strip log.</p></div>
+          <div class="card"><h3>rankedBars</h3><div id="bars" class="plot" style="height:300px"></div></div>
+        </aside>
+      </div>
+    </section>
+
+    <section id="geochem" class="gallery-section">
+      <h2>Geochemistry</h2>
+      <p class="lead">Correlations, co-enrichment by hole, cross-plot and distribution.</p>
+      <div class="grid cols-2">
+        <div class="card"><h3>correlationHeatmap</h3><div id="corr" class="plot" style="height:420px"></div></div>
+        <div class="card"><h3>matrixHeatmap</h3><div id="matrix" class="plot" style="height:420px"></div></div>
+        <div class="card">
+          <div class="card-head"><h3>crossPlot</h3>
+            <div class="chips" id="focus" role="group" aria-label="Highlighted hole"></div></div>
+          <div id="cross" class="plot" style="height:400px"></div>
+        </div>
+        <div class="card"><h3>logHistogram</h3><div id="hist" class="plot" style="height:400px"></div></div>
+        <div class="card span-2"><h3>lineOverlay</h3><div id="lines" class="plot" style="height:340px"></div></div>
+      </div>
+    </section>
+
+    <section id="space" class="gallery-section">
+      <h2>3D and plan view</h2>
+      <div class="grid cols-2">
+        <div class="card"><h3>holes3d</h3><div id="holes3d" class="plot" style="height:460px"></div>
+          <p class="note">Drag to rotate. Markers are coloured and sized by grade on a log scale.</p></div>
+        <div class="card"><h3>planView</h3><div id="plan" class="plot" style="height:460px"></div></div>
+      </div>
+    </section>
+
+    <section id="maps" class="gallery-section">
+      <h2>Maps</h2>
+      <p class="lead">Leaflet layers. Basemap tiles need a network connection; the layers draw without it.</p>
+      <div class="grid cols-2">
+        <div class="card"><h3>gradedPoints</h3><div id="map-points" class="rbv-map"></div></div>
+        <div class="card"><h3>collarTraces</h3><div id="map-collars" class="rbv-map"></div></div>
+        <div class="card span-2">
+          <div class="card-head"><h3>bandedArea, labeledPin, buttonControl</h3>
+            <button class="chip" id="png" type="button">Download map as PNG</button></div>
+          <div id="map-area" class="rbv-map"></div>
+          <p class="note" id="png-note" role="status"></p>
+        </div>
+      </div>
+    </section>
+
+    <section id="images" class="gallery-section">
+      <h2>Images</h2>
+      <p class="lead"><code>gallery</code> opens the lightbox: arrow keys move, Escape closes.</p>
+      <div class="card" id="gallery"></div>
+    </section>
+  </main>
+  <footer class="footer">rb-viz gallery · all data on this page is generated in the browser</footer>
+
+  <script src="../node_modules/leaflet/dist/leaflet.js"></script>
+  <script src="../node_modules/plotly.js-dist-min/plotly.min.js"></script>
+  <script type="module" src="gallery.js"></script>
+</body>
+</html>

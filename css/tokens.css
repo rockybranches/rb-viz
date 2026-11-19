@@ -1,0 +1,72 @@
+/* generated from src/rb_viz/tokens.json by scripts/build.mjs; do not edit */
+:root {
+  color-scheme: light;
+  --page: #f9f9f7;
+  --surface: #fcfcfb;
+  --surface-2: #f2f1ed;
+  --ink: #0b0b0b;
+  --ink-2: #4c5753;
+  --muted: #626b66;
+  --grid: #e4dfd4;
+  --axis: #c3c2b7;
+  --border: rgba(11, 11, 11, 0.10);
+  --accent: #1c5cab;
+  --series-1: #2a78d6;
+  --series-2: #eb6834;
+  --series-3: #1baf7a;
+  --diverge-mid: #f0efec;
+  --diverge-neg: #2a78d6;
+  --diverge-pos: #e34948;
+  --header: #13233a;
+  --header-ink: #f0efec;
+  --shadow: 0 1px 2px rgba(0,0,0,.04), 0 4px 16px rgba(0,0,0,.05);
+  --seq: #cde2fb, #9ec5f4, #6da7ec, #3987e5, #256abf, #1c5cab, #104281;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --page: #0d0d0d;
+    --surface: #1a1a19;
+    --surface-2: #232321;
+    --ink: #f0efec;
+    --ink-2: #c3c2b7;
+    --muted: #898781;
+    --grid: #2c2c2a;
+    --axis: #383835;
+    --border: rgba(255,255,255,0.10);
+    --accent: #6da7ec;
+    --series-1: #3987e5;
+    --series-2: #d95926;
+    --series-3: #199e70;
+    --diverge-mid: #383835;
+    --diverge-neg: #3987e5;
+    --diverge-pos: #e66767;
+    --header: #101826;
+    --header-ink: #f0efec;
+    --shadow: none;
+    --seq: #cde2fb, #9ec5f4, #6da7ec, #3987e5, #256abf, #1c5cab, #104281;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --page: #0d0d0d;
+  --surface: #1a1a19;
+  --surface-2: #232321;
+  --ink: #f0efec;
+  --ink-2: #c3c2b7;
+  --muted: #898781;
+  --grid: #2c2c2a;
+  --axis: #383835;
+  --border: rgba(255,255,255,0.10);
+  --accent: #6da7ec;
+  --series-1: #3987e5;
+  --series-2: #d95926;
+  --series-3: #199e70;
+  --diverge-mid: #383835;
+  --diverge-neg: #3987e5;
+  --diverge-pos: #e66767;
+  --header: #101826;
+  --header-ink: #f0efec;
+  --shadow: none;
+  --seq: #cde2fb, #9ec5f4, #6da7ec, #3987e5, #256abf, #1c5cab, #104281;
+}

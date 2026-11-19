@@ -13,3 +13,12 @@ __pycache__/
 *.prj
 *.cpg
 output/
+
+# JavaScript
+node_modules/
+
+# Python builds
+dist/*.whl
+dist/*.tar.gz
+*.egg-info/
+.pytest_cache/
