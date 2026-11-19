@@ -1086,6 +1086,7 @@ var RBViz = (() => {
   // js/widgets/lightbox.js
   var box = null;
   var state = { items: [], i: 0, caption: null, opener: null };
+  var background = [];
   function ensure() {
     if (box) return box;
     box = document.createElement("div");
@@ -1129,6 +1130,14 @@ var RBViz = (() => {
       first.focus();
     }
   }
+  function disableBackground() {
+    background = [...document.body.children].filter((element) => element !== box).map((element) => ({ element, inert: element.inert }));
+    for (const { element } of background) element.inert = true;
+  }
+  function restoreBackground() {
+    for (const { element, inert } of background) element.inert = inert;
+    background = [];
+  }
   function step(by) {
     state.i = (state.i + by + state.items.length) % state.items.length;
     show();
@@ -1147,12 +1156,14 @@ var RBViz = (() => {
     Object.assign(state, { items, i: index, caption, opener: document.activeElement });
     show();
     box.hidden = false;
+    disableBackground();
     document.body.style.overflow = "hidden";
     box.querySelector(".lb-close").focus();
   }
   function closeLightbox() {
     if (!box || box.hidden) return;
     box.hidden = true;
+    restoreBackground();
     document.body.style.overflow = "";
     state.opener?.focus?.();
   }
