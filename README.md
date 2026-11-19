@@ -24,3 +24,10 @@ uv run jupyter lab notebooks/rimrock.ipynb
 This repository is public: commit the notebook with its outputs cleared
 (`uv run jupyter nbconvert --clear-output --inplace notebooks/rimrock.ipynb`). `.gitignore`
 keeps spreadsheets, CSVs and shapefiles out.
+
+## Branding
+
+Chart chrome (grid lines and annotation text) uses the neutral colours from
+[rb-brand](https://github.com/rockybranches/rb-brand), the single source for Rocky Branches
+branding. Change them there first, then copy the new values into the notebook's setup cell.
+The data series colours are the notebook's own.
