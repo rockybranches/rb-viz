@@ -55,7 +55,7 @@ test("quantileLogScale clamps to the quantiles and ignores non-positive values",
   assert.equal(s.t(1), 0);
   assert.equal(s.t(1000), 1);
   assert.equal(s.colorOf(1000), V.SEQUENTIAL.at(-1));
-  assert.equal(s.colorOf(null), "#898781");
+  assert.equal(s.colorOf(null), V.TOKENS.light.muted);
   assert.ok(Math.abs(s.value(0.5) - 10) < 1e-9);
   assert.equal(V.quantileLogScale([0, null]), null);
   assert.equal(V.quantileLogScale([5, 5, 5]).flat, true);

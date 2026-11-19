@@ -133,6 +133,14 @@ This repository is public: commit notebooks with their outputs cleared
 (`uv run jupyter nbconvert --clear-output --inplace notebooks/rimrock.ipynb`). `.gitignore` keeps
 spreadsheets, CSVs and shapefiles out.
 
+## Branding
+
+Chart chrome in the light theme (grid lines, secondary text and annotations, muted marks) uses
+the neutral colours from [rb-brand](https://github.com/rockybranches/rb-brand), the single
+source for Rocky Branches branding. Change them there first, then copy the new values into
+`src/rb_viz/tokens.json` (`grid`, `ink-2`, `muted`) and run `npm run build`. The data series
+colours are rb-viz's own.
+
 ## Working on rb-viz
 
 ```bash

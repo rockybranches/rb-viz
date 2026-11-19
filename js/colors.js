@@ -47,7 +47,7 @@ export const divergingColorscale = (theme) => [[0, theme.divergeNeg], [0.5, them
  *   scale.colorOf(v)  color(t(v))
  *   scale.value(t)    the value at a position, for legend labels
  */
-export function quantileLogScale(values, { steps = SEQUENTIAL, low = 0.05, high = 0.95, missing = "#898781" } = {}) {
+export function quantileLogScale(values, { steps = SEQUENTIAL, low = 0.05, high = 0.95, missing = TOKENS.light.muted } = {}) {
   const logs = values.map(log10).filter((v) => v != null).sort((a, b) => a - b);
   if (!logs.length) return null;
   const q = (p) => logs[Math.min(logs.length - 1, Math.floor(p * (logs.length - 1)))];

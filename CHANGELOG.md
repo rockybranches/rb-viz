@@ -24,6 +24,9 @@ held one notebook.
 - The project is a hatchling package; rb-rimrock is in the `notebooks` dependency group
   (`uv sync --group notebooks`).
 
+- Grid lines, secondary text and muted marks in the light theme use the Rocky Branches neutral
+  colours from rb-brand (`grid`, `ink-2`, `muted` in `tokens.json`), for every component.
+
 ### Fixed (relative to the copies in the other projects)
 - Strip logs no longer shade across depths that were not sampled.
 - The reachable-area layer sits below markers, so a pin on it keeps its colour, on screen and

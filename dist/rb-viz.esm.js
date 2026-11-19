@@ -7,9 +7,9 @@ var TOKENS = {
     "surface": "#fcfcfb",
     "surface-2": "#f2f1ed",
     "ink": "#0b0b0b",
-    "ink-2": "#52514e",
-    "muted": "#898781",
-    "grid": "#e1e0d9",
+    "ink-2": "#4c5753",
+    "muted": "#626b66",
+    "grid": "#e4dfd4",
     "axis": "#c3c2b7",
     "border": "rgba(11, 11, 11, 0.10)",
     "accent": "#1c5cab",
@@ -208,7 +208,7 @@ function categoricalScale(palette = CATEGORICAL, known = {}) {
 }
 var colorscale = (steps = SEQUENTIAL) => steps.map((c, i) => [steps.length === 1 ? 0 : i / (steps.length - 1), c]);
 var divergingColorscale = (theme) => [[0, theme.divergeNeg], [0.5, theme.divergeMid], [1, theme.divergePos]];
-function quantileLogScale(values, { steps = SEQUENTIAL, low = 0.05, high = 0.95, missing = "#898781" } = {}) {
+function quantileLogScale(values, { steps = SEQUENTIAL, low = 0.05, high = 0.95, missing = TOKENS.light.muted } = {}) {
   const logs = values.map(log10).filter((v) => v != null).sort((a, b) => a - b);
   if (!logs.length) return null;
   const q = (p) => logs[Math.min(logs.length - 1, Math.floor(p * (logs.length - 1)))];
