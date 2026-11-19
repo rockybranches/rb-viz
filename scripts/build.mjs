@@ -2,6 +2,7 @@
 //   js/tokens.js and css/tokens.css  from src/rb_viz/tokens.json (the one place colours are set)
 //   dist/rb-viz.css                  css/tokens.css + css/components.css + css/maps.css
 //   dist/rb-viz.js, dist/rb-viz.esm.js  the modules under js/ as one file each
+//   src/rb_viz/assets/               copies of rb-viz.css and rb-viz.js for the Python package
 // Run with `npm run build`. `npm run check` fails when the committed output is out of date.
 import { readFile, writeFile, mkdir } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
@@ -54,12 +55,15 @@ await emit("css/tokens.css", tokensCss);
 const css = [tokensCss];
 for (const name of ["components.css", "maps.css"]) css.push(await readFile(join(root, "css", name), "utf8"));
 await emit("dist/rb-viz.css", css.join("\n"));
+// the Python package ships the stylesheet and the classic script, for pages written from Python
+await emit("src/rb_viz/assets/rb-viz.css", css.join("\n"));
 
 // tokens.js must exist before bundling; in --check mode the committed copy is bundled
 const common = { entryPoints: [join(root, "js/index.js")], bundle: true, write: false, target: "es2020",
   banner: { js: "/* rb-viz: https://github.com/rockybranches/rb-viz */" } };
 const iife = await build({ ...common, format: "iife", globalName: "RBViz" });
 await emit("dist/rb-viz.js", iife.outputFiles[0].text);
+await emit("src/rb_viz/assets/rb-viz.js", iife.outputFiles[0].text);
 const esm = await build({ ...common, format: "esm" });
 await emit("dist/rb-viz.esm.js", esm.outputFiles[0].text);
 

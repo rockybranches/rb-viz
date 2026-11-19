@@ -22,6 +22,19 @@ export function stepSeries(intervals, tolerance = 1e-6) {
   return { x, y };
 }
 
+/** stepSeries cut at its breaks: one { x, y } per unbroken run of sampled intervals. */
+export function stepRuns(intervals, tolerance = 1e-6) {
+  const { x, y } = stepSeries(intervals, tolerance);
+  const runs = [];
+  let run = null;
+  for (let i = 0; i < x.length; i++) {
+    if (x[i] == null) { run = null; continue; }
+    if (!run) runs.push(run = { x: [], y: [] });
+    run.x.push(x[i]); run.y.push(y[i]);
+  }
+  return runs;
+}
+
 /**
  * A strip log.
  *
@@ -77,9 +90,11 @@ export function stripLog(tracks, { depthTitle = "Depth", selected = null, maxTra
     if (t.range) layout[key].range = t.range;
     const values = t.intervals.map((iv) => iv.value).filter((v) => v != null);
     if (t.log && values.length && values.every((v) => v > 0)) layout[key].type = "log";
-    const steps = stepSeries(t.intervals);
-    data.push({ type: "scatter", mode: "lines", xaxis: xa, yaxis: "y", x: steps.x, y: steps.y,
-      line: { color, width: 1.5 }, fill: "tozerox", fillcolor: withAlpha(color, 0.2), hoverinfo: "skip" });
+    // one trace per unbroken run of intervals: a single filled trace would shade across the gaps
+    for (const run of stepRuns(t.intervals)) {
+      data.push({ type: "scatter", mode: "lines", xaxis: xa, yaxis: "y", x: run.x, y: run.y,
+        line: { color, width: 1.5 }, fill: "tozerox", fillcolor: withAlpha(color, 0.2), hoverinfo: "skip" });
+    }
     // invisible markers at interval mid-points carry the tooltip
     data.push({ type: "scatter", mode: "markers", xaxis: xa, yaxis: "y", x: t.intervals.map((iv) => iv.value), y: t.intervals.map(mid),
       marker: { size: 8, opacity: 0 }, customdata: t.intervals.map((iv) => (iv.note ? ` (${esc(iv.note)})` : "")),

@@ -54,3 +54,60 @@ def test_cluster_marker_map(tmp_path):
     lat, lon = m.location
     assert 40 < lat < 41 and -117 < lon < -116  # centred on the markers
     assert maps.cluster_marker_map(holes).get_root().render().count("L.marker(") == 2
+
+
+@pytest.fixture
+def samples():
+    rng = np.random.default_rng(2)
+    df = pd.DataFrame({"hole": ["R1"] * 20 + ["R9"] * 20, "from": np.tile(np.arange(0, 100, 5.0), 2),
+                       "sample": [f"s{i}" for i in range(40)], "Au": rng.lognormal(-3, 1, 40), "Ag": rng.lognormal(0, 1, 40),
+                       "lith": ["Shale"] * 10 + ["Chert"] * 10 + ["Basalt"] * 20})
+    df["to"] = df["from"] + 5
+    df.loc[0, "Au"] = 0.0
+    df.loc[1, "Ag"] = np.nan
+    return df
+
+
+def test_cross_plot_highlights_and_drops_unusable_points(samples):
+    fig = interactive.cross_plot(samples, "Ag", "Au", highlight="hole", value="R9", label="sample")
+    assert [t.name for t in fig.data] == ["Others", "R9"]
+    assert len(fig.data[0].x) == 18 and len(fig.data[1].x) == 20   # the zero and the missing value are gone
+    assert fig.layout.xaxis.type == "log"
+    plain = interactive.cross_plot(samples, "Ag", "Au", log=False)
+    assert len(plain.data[0].x) == 39 and plain.layout.showlegend is False
+
+
+def test_log_histogram(samples):
+    fig = interactive.log_histogram({"Others": samples.loc[samples.hole == "R1", "Au"], "R9": samples.loc[samples.hole == "R9", "Au"]},
+                                    title="Au (g/t)", bin_size=0.1)
+    assert len(fig.data[0].x) == 19            # the zero is left out
+    assert fig.data[0].marker.color != fig.data[1].marker.color
+    assert fig.layout.xaxis.title.text == "log₁₀ Au (g/t)"
+    with pytest.raises(ValueError, match="at most"):
+        interactive.log_histogram({str(i): [1.0] for i in range(9)})
+
+
+def test_interactive_strip_log(samples):
+    hole = samples[samples.hole == "R1"]
+    fig = interactive.strip_log(hole, ["Au", "Ag"], category="lith", log=True, depth_label="Depth (ft)")
+    fills = [t for t in fig.data if t.type == "scatter" and t.fill]
+    assert len(fills) == 1 + 2                  # Au in one run; Ag split in two by its missing value
+    assert all(not np.isnan(np.asarray(t.x, dtype=float)).any() for t in fills)
+    assert fig.data[0].type == "bar" and set(fig.data[0].marker.color) == {"#5b5b5b", "#7d9db7"}  # Shale, Chert
+    assert fig.layout.yaxis.range[0] > fig.layout.yaxis.range[1]                    # depth increases downward
+    assert fig.layout.xaxis2.type == "linear"   # Au has a zero: no log axis
+    assert fig.layout.xaxis3.type == "log"
+    with pytest.raises(ValueError):
+        interactive.strip_log(hole, [])
+
+
+def test_holes_3d(samples):
+    collars = pd.DataFrame({"x": [0.0, 100.0], "y": [0.0, 0.0], "z": [1000.0, 1000.0], "azimuth": [0.0, 90.0],
+                            "inclination": [90.0, 0.0], "length": [100.0, 100.0]}, index=["R1", "R9"])
+    fig = interactive.holes_3d(collars, samples, "Au", depth_scale=0.5, value_title="Au g/t")
+    assert len(fig.data) == 4
+    assert list(fig.data[0].z) == pytest.approx([1000, 950])           # vertical hole, half scale
+    assert list(fig.data[2].x) == pytest.approx([100, 150])            # horizontal hole heading east
+    assert len(fig.data[1].x) == 19                                    # the zero Au is left out
+    assert fig.data[1].marker.colorbar.title.text == "Au g/t"
+    assert fig.data[3].marker.colorbar.title.text is None              # one colour bar only

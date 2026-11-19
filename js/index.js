@@ -16,3 +16,4 @@ export * from "./maps/layers.js";
 export * from "./maps/png.js";
 export * from "./widgets/lightbox.js";
 export * from "./widgets/blocks.js";
+export * from "./widgets/shell.js";

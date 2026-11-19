@@ -38,6 +38,17 @@ test("stripLog lays tracks side by side on a shared, downward depth axis", () =>
   assert.equal(data[2].customdata[0], " (below detection)");
 });
 
+test("stripLog fills each unbroken run separately, so gaps stay empty", () => {
+  const gappy = { type: "value", title: "Au", intervals: [{ from: 0, to: 5, value: 1 }, { from: 5, to: 10, value: 2 },
+    { from: 20, to: 25, value: 3 }, { from: 25, to: 30, value: null }, { from: 30, to: 35, value: 4 }] };
+  assert.deepEqual(V.stepRuns(gappy.intervals), [{ x: [1, 1, 2, 2], y: [0, 5, 5, 10] }, { x: [3, 3], y: [20, 25] }, { x: [4, 4], y: [30, 35] }]);
+  const { data } = V.stripLog([gappy], { theme });
+  const fills = data.filter((t) => t.fill);
+  assert.equal(fills.length, 3);
+  assert.ok(fills.every((t) => !t.x.includes(null)));
+  assert.equal(data.length, 4); // three runs and the tooltip markers
+});
+
 test("stripLog: no log axis when a value is zero; maxTracks keeps category tracks", () => {
   const zero = { ...au, intervals: [{ from: 0, to: 5, value: 0 }, { from: 5, to: 10, value: 1 }] };
   assert.equal(V.stripLog([zero], { theme }).layout.xaxis.type, undefined);

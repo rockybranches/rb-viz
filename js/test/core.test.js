@@ -79,3 +79,13 @@ test("draw without Plotly or a DOM is not attempted here; specs are plain data",
   assert.deepEqual(spec.data[0].x, [0.5, 0.9]);
   assert.doesNotThrow(() => JSON.stringify(spec));
 });
+
+test("parseHash and hashFor round-trip, including names that need encoding", () => {
+  assert.deepEqual(V.parseHash(""), []);
+  assert.deepEqual(V.parseHash("#/"), []);
+  assert.deepEqual(V.parseHash("#/holes/R%209/120"), ["holes", "R 9", "120"]);
+  assert.deepEqual(V.parseHash("#/bad/%E0%A4%A"), ["bad", "%E0%A4%A"]); // malformed escape kept as typed
+  assert.equal(V.hashFor("holes", "R 9", 120), "#/holes/R%209/120");
+  assert.equal(V.hashFor("holes", "A/B", null), "#/holes/A%2FB");
+  assert.deepEqual(V.parseHash(V.hashFor("holes", "A/B")), ["holes", "A/B"]);
+});

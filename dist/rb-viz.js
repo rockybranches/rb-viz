@@ -58,6 +58,8 @@ var RBViz = (() => {
     fmt: () => fmt,
     gallery: () => gallery,
     gradedPoints: () => gradedPoints,
+    hashFor: () => hashFor,
+    hashRouter: () => hashRouter,
     holes3d: () => holes3d,
     imageOverlay: () => imageOverlay,
     initTheme: () => initTheme,
@@ -73,15 +75,18 @@ var RBViz = (() => {
     onDepthPick: () => onDepthPick,
     onPointClick: () => onPointClick,
     openLightbox: () => openLightbox,
+    parseHash: () => parseHash,
     planView: () => planView,
     plural: () => plural,
     quantileLogScale: () => quantileLogScale,
     rankedBars: () => rankedBars,
     renderMapPng: () => renderMapPng,
     scoresMatrix: () => scoresMatrix,
+    setActiveNav: () => setActiveNav,
     showEmpty: () => showEmpty,
     slug: () => slug,
     statTiles: () => statTiles,
+    stepRuns: () => stepRuns,
     stepSeries: () => stepSeries,
     stripLog: () => stripLog,
     stripLogHeight: () => stripLogHeight,
@@ -395,6 +400,21 @@ var RBViz = (() => {
     }
     return { x, y };
   }
+  function stepRuns(intervals, tolerance = 1e-6) {
+    const { x, y } = stepSeries(intervals, tolerance);
+    const runs = [];
+    let run = null;
+    for (let i = 0; i < x.length; i++) {
+      if (x[i] == null) {
+        run = null;
+        continue;
+      }
+      if (!run) runs.push(run = { x: [], y: [] });
+      run.x.push(x[i]);
+      run.y.push(y[i]);
+    }
+    return runs;
+  }
   function stripLog(tracks, { depthTitle = "Depth", selected = null, maxTracks = Infinity, theme = currentTheme() } = {}) {
     let kept = 0;
     tracks = tracks.filter((t) => t.type === "category" || kept++ < maxTracks);
@@ -451,19 +471,20 @@ var RBViz = (() => {
       if (t.range) layout[key].range = t.range;
       const values = t.intervals.map((iv) => iv.value).filter((v) => v != null);
       if (t.log && values.length && values.every((v) => v > 0)) layout[key].type = "log";
-      const steps = stepSeries(t.intervals);
-      data.push({
-        type: "scatter",
-        mode: "lines",
-        xaxis: xa,
-        yaxis: "y",
-        x: steps.x,
-        y: steps.y,
-        line: { color, width: 1.5 },
-        fill: "tozerox",
-        fillcolor: withAlpha(color, 0.2),
-        hoverinfo: "skip"
-      });
+      for (const run of stepRuns(t.intervals)) {
+        data.push({
+          type: "scatter",
+          mode: "lines",
+          xaxis: xa,
+          yaxis: "y",
+          x: run.x,
+          y: run.y,
+          line: { color, width: 1.5 },
+          fill: "tozerox",
+          fillcolor: withAlpha(color, 0.2),
+          hoverinfo: "skip"
+        });
+      }
       data.push({
         type: "scatter",
         mode: "markers",
@@ -1177,6 +1198,47 @@ var RBViz = (() => {
       Object.assign(state2, changes);
       draw2();
     } };
+  }
+
+  // js/widgets/shell.js
+  function parseHash(hash = globalThis.location?.hash ?? "") {
+    const path = hash.replace(/^#\/?/, "");
+    if (!path) return [];
+    return path.split("/").map((part) => {
+      try {
+        return decodeURIComponent(part);
+      } catch {
+        return part;
+      }
+    });
+  }
+  var hashFor = (...parts) => `#/${parts.filter((p) => p != null && p !== "").map((p) => encodeURIComponent(p)).join("/")}`;
+  function setActiveNav(route, nav = document.getElementById("nav")) {
+    nav?.querySelectorAll("a[data-route]").forEach((a) => {
+      const on = a.dataset.route === route;
+      a.classList.toggle("active", on);
+      if (on) a.setAttribute("aria-current", "page");
+      else a.removeAttribute("aria-current");
+    });
+  }
+  function hashRouter(routes, { root = document.getElementById("app"), nav = document.getElementById("nav") } = {}) {
+    const render = async () => {
+      const [name = "", ...rest] = parseHash();
+      const key = Object.hasOwn(routes, name) ? name : "";
+      setActiveNav(key || "overview", nav);
+      try {
+        await routes[key]?.(...rest);
+      } catch (e) {
+        console.error(e);
+        if (root) root.innerHTML = `<div class="error" role="alert"><b>Could not show this page.</b> ${esc(e.message)}</div>`;
+      }
+    };
+    globalThis.addEventListener("hashchange", () => {
+      render();
+      globalThis.scrollTo?.(0, 0);
+    });
+    render();
+    return { render };
   }
   return __toCommonJS(index_exports);
 })();
