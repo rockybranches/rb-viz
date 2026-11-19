@@ -1,5 +1,24 @@
 # Changelog
 
+## 0.3.0
+
+rb-viz can be loaded from a CDN: jsDelivr serves each release from this repository's tag at
+`https://cdn.jsdelivr.net/gh/rockybranches/rb-viz@<version>/dist/`.
+
+### Added
+- Minified builds with source maps: `dist/rb-viz.min.js`, `dist/rb-viz.esm.min.js` and
+  `dist/rb-viz.min.css`.
+- `dist/cdn.json`: the CDN address of the version and an integrity (SRI) hash for every file.
+- A Release workflow: a merge to master with a new version is tagged, published as a GitHub
+  release with the HTML tags to copy, and checked against the CDN.
+- `scripts/cdn.mjs` (`npm run cdn:snippet`, `npm run cdn:verify`).
+- Python: `rb_viz.web.cdn_url()`, `cdn_integrity()`, `cdn_tags()`, and
+  `standalone_page(..., assets="cdn")` for a page that loads rb-viz from the CDN.
+
+### Changed
+- The built files carry the version in their first line.
+- The build fails when `package.json`, `pyproject.toml` and `rb_viz.__version__` disagree.
+
 ## 0.2.0
 
 rb-viz becomes the shared visualization library of the rockybranches projects. Before this it

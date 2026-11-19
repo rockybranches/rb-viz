@@ -1,0 +1,59 @@
+name: Release
+
+# A merge to master that carries a new version in package.json becomes a release: the commit is
+# tagged v<version>, which is all jsDelivr needs to serve
+# https://cdn.jsdelivr.net/gh/rockybranches/rb-viz@<version>/dist/... (see README, "From the CDN").
+# A version that already has a tag is left alone: released files never change.
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency: release
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Is this version released already?
+        id: version
+        run: |
+          version=$(node -p "require('./package.json').version")
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          if git ls-remote --exit-code --tags origin "refs/tags/v$version" > /dev/null; then
+            echo "v$version is already released; nothing to do."
+          else
+            echo "new=true" >> "$GITHUB_OUTPUT"
+          fi
+      - uses: actions/setup-node@v4
+        if: steps.version.outputs.new
+        with:
+          node-version: 22
+          cache: npm
+      - name: Test, and check that dist/ is built from this commit
+        if: steps.version.outputs.new
+        run: |
+          npm ci
+          npm test
+          npm run check
+          grep -q "^## ${{ steps.version.outputs.version }}$" CHANGELOG.md \
+            || { echo "CHANGELOG.md has no entry for ${{ steps.version.outputs.version }}"; exit 1; }
+      - name: Tag and publish the release
+        if: steps.version.outputs.new
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          node scripts/cdn.mjs notes > "$RUNNER_TEMP/notes.md"
+          gh release create "v${{ steps.version.outputs.version }}" --target "$GITHUB_SHA" \
+            --title "rb-viz ${{ steps.version.outputs.version }}" --notes-file "$RUNNER_TEMP/notes.md" \
+            dist/cdn.json
+      - name: The CDN serves the released files
+        if: steps.version.outputs.new
+        run: node scripts/cdn.mjs verify
+      - name: Refresh the moving addresses (@latest, @0, @0.x)
+        if: steps.version.outputs.new
+        run: node scripts/cdn.mjs purge

@@ -1,9 +1,12 @@
 {
   "name": "@rockybranches/rb-viz",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Shared data visualization components for rockybranches projects",
   "type": "module",
   "main": "dist/rb-viz.esm.js",
+  "jsdelivr": "dist/rb-viz.min.js",
+  "unpkg": "dist/rb-viz.min.js",
+  "style": "dist/rb-viz.min.css",
   "exports": {
     ".": "./js/index.js",
     "./css": "./dist/rb-viz.css",
@@ -14,7 +17,9 @@
     "build": "node scripts/build.mjs",
     "check": "node scripts/build.mjs --check",
     "test": "node --test \"js/test/*.test.js\"",
-    "gallery": "node scripts/serve.mjs"
+    "gallery": "node scripts/serve.mjs",
+    "cdn:snippet": "node scripts/cdn.mjs snippet",
+    "cdn:verify": "node scripts/cdn.mjs verify"
   },
   "repository": "github:rockybranches/rb-viz",
   "devDependencies": {
