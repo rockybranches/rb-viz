@@ -33,6 +33,14 @@ def test_cdn_manifest_matches_the_built_files_and_the_version():
         web.cdn_url("rb-viz.min.js.map")
 
 
+def test_readme_cdn_snippet_is_for_this_version():
+    readme = (ROOT / "README.md").read_text(encoding="utf-8")
+    versions = set(re.findall(r"rb-viz@(\d[\w.]*)/dist", readme))
+    assert versions == {web.CDN_BASE.split("@")[1].split("/")[0]}, "update the CDN snippet in README.md (npm run cdn:snippet)"
+    hashes = set(re.findall(r"sha384-[A-Za-z0-9+/=]+", readme))
+    assert hashes == {web.cdn_integrity("rb-viz.min.css"), web.cdn_integrity("rb-viz.min.js")}
+
+
 def test_cdn_tags_and_a_page_that_loads_rb_viz_from_the_cdn():
     css, js = web.cdn_tags().split("\n")
     assert css.startswith('<link rel="stylesheet" href="' + web.cdn_url("rb-viz.min.css") + '" integrity="sha384-')
