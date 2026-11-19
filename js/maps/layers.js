@@ -63,7 +63,7 @@ export function collarTraces(map, collars, { L, fit = true, theme = currentTheme
       bounds.push(line[1]);
     }
     const marker = L.circleMarker([c.lat, c.lon], { radius: 7, color: "#fff", weight: 2, fillColor: theme.header, fillOpacity: 1 })
-      .bindTooltip(String(c.id), { permanent: true, direction: "right", className: "pt-label", offset: [8, 0] });
+      .bindTooltip(esc(c.id), { permanent: true, direction: "right", className: "pt-label", offset: [8, 0] });
     if (c.popup) marker.bindPopup(c.popup);
     marker.addTo(layer);
     bounds.push([c.lat, c.lon]);
@@ -76,7 +76,7 @@ export function collarTraces(map, collars, { L, fit = true, theme = currentTheme
  * A reachable area in distance bands, with its legend.
  *
  * geojson: a FeatureCollection whose features have properties { band, from_m, to_m }, band 0
- * nearest. The area is usually thousands of touching cells; drawn translucent they would show
+ * nearest (one feature per band, or many features sharing a band). The area is usually thousands of touching cells; drawn translucent they would show
  * seams, so they are drawn solid on a canvas in a pane of their own and the pane is made
  * translucent. Create the map with `preferCanvas: true`.
  * Returns { layer, legend, bounds } (bounds may be invalid for an empty area: check isValid()).
@@ -91,7 +91,10 @@ export function bandedArea(map, geojson, { L, colors = BAND_COLORS, title = "Dis
   const color = (feature) => colors[Math.min(feature.properties.band, colors.length - 1)];
   const layer = L.geoJSON(geojson, { pane, renderer, interactive: false,
     style: (feature) => ({ color: color(feature), weight: 1, fillColor: color(feature), fillOpacity: 1 }) }).addTo(map);
-  const legend = legendControl(geojson.features.map((f) => ({ color: color(f),
+  // one legend row per band, nearest first, however many features (one per band, or one per cell) carry it
+  const bands = new Map();
+  for (const f of geojson.features) if (!bands.has(f.properties.band)) bands.set(f.properties.band, f);
+  const legend = legendControl([...bands.values()].sort((a, b) => a.properties.band - b.properties.band).map((f) => ({ color: color(f),
     label: `${fixed(f.properties.from_m / 1000, 1)}–${fixed(f.properties.to_m / 1000, 1)} km` })), { L, map, title, shape: "square" });
   return { layer, legend, bounds: layer.getBounds() };
 }

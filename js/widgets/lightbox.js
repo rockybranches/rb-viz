@@ -30,8 +30,18 @@ function ensure() {
     if (e.key === "Escape") closeLightbox();
     if (e.key === "ArrowLeft") step(-1);
     if (e.key === "ArrowRight") step(1);
+    if (e.key === "Tab") trapFocus(e);
   });
   return box;
+}
+
+// The viewer covers the page, so Tab must stay within it: wrap from the last control to the first.
+function trapFocus(e) {
+  const stops = [...box.querySelectorAll("button, a[href]")].filter((n) => !n.hidden);
+  const first = stops[0], last = stops.at(-1);
+  if (!box.contains(document.activeElement)) { e.preventDefault(); first.focus(); }
+  else if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+  else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
 }
 
 function step(by) {

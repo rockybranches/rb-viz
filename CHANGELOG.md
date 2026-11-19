@@ -28,7 +28,8 @@ held one notebook.
 - Strip logs no longer shade across depths that were not sampled.
 - The reachable-area layer sits below markers, so a pin on it keeps its colour, on screen and
   in the exported PNG.
-- Marker names on the folium map are escaped.
+- Marker names are escaped: collar and pin labels on Leaflet maps, and marker tooltips on the
+  folium map (Leaflet and folium both treat tooltip text as HTML).
 
 ### Removed
 - The unused Poetry metadata with its `open3d` dependency, and `requirements.txt`.

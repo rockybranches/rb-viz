@@ -877,7 +877,7 @@ var RBViz = (() => {
       },
       setLabel(text) {
         marker.unbindTooltip();
-        if (text) marker.bindTooltip(text, { permanent: true, direction: "right", offset: [8, -14], className: "site-label", interactive: false });
+        if (text) marker.bindTooltip(esc(text), { permanent: true, direction: "right", offset: [8, -14], className: "site-label", interactive: false });
         return pin;
       },
       remove() {
@@ -888,9 +888,9 @@ var RBViz = (() => {
     if (label) pin.setLabel(label);
     return pin;
   }
-  function imageOverlay(map, src, bounds, { L, checkbox, slider, opacity = 0.6 } = {}) {
+  function imageOverlay(map, src, bounds, { L, checkbox, slider, opacity = 0.6, exportable = false } = {}) {
     L = leaflet(L);
-    const layer = L.imageOverlay(src, bounds, { opacity: slider ? +slider.value : opacity });
+    const layer = L.imageOverlay(src, bounds, { opacity: slider ? +slider.value : opacity, ...exportable ? { crossOrigin: "" } : {} });
     if (checkbox) {
       const sync = () => {
         if (checkbox.checked) {
@@ -941,7 +941,7 @@ var RBViz = (() => {
         L.polyline(line, { color: theme.series[1], weight: 4, opacity: 0.95 }).addTo(layer);
         bounds.push(line[1]);
       }
-      const marker = L.circleMarker([c.lat, c.lon], { radius: 7, color: "#fff", weight: 2, fillColor: theme.header, fillOpacity: 1 }).bindTooltip(String(c.id), { permanent: true, direction: "right", className: "pt-label", offset: [8, 0] });
+      const marker = L.circleMarker([c.lat, c.lon], { radius: 7, color: "#fff", weight: 2, fillColor: theme.header, fillOpacity: 1 }).bindTooltip(esc(c.id), { permanent: true, direction: "right", className: "pt-label", offset: [8, 0] });
       if (c.popup) marker.bindPopup(c.popup);
       marker.addTo(layer);
       bounds.push([c.lat, c.lon]);
@@ -963,7 +963,9 @@ var RBViz = (() => {
       interactive: false,
       style: (feature) => ({ color: color(feature), weight: 1, fillColor: color(feature), fillOpacity: 1 })
     }).addTo(map);
-    const legend = legendControl(geojson.features.map((f) => ({
+    const bands = /* @__PURE__ */ new Map();
+    for (const f of geojson.features) if (!bands.has(f.properties.band)) bands.set(f.properties.band, f);
+    const legend = legendControl([...bands.values()].sort((a, b) => a.properties.band - b.properties.band).map((f) => ({
       color: color(f),
       label: `${fixed(f.properties.from_m / 1e3, 1)}\u2013${fixed(f.properties.to_m / 1e3, 1)} km`
     })), { L, map, title, shape: "square" });
@@ -1008,9 +1010,10 @@ var RBViz = (() => {
     ctx.scale(scale, scale);
     ctx.fillStyle = "#ddd";
     ctx.fillRect(0, 0, box2.width, box2.height);
-    const pieces = [...container.querySelectorAll("img.leaflet-tile-loaded, .leaflet-pane canvas")].map((node, order) => {
+    const pieces = [...container.querySelectorAll("img.leaflet-tile-loaded, img.leaflet-image-layer, .leaflet-pane canvas")].filter((node) => node.tagName !== "IMG" || node.complete && node.naturalWidth > 0).map((node, order) => {
       const style = getComputedStyle(node.closest(".leaflet-pane"));
-      return { node, order, z: Number(style.zIndex) || 0, opacity: Number(style.opacity) };
+      const own = node.classList.contains("leaflet-image-layer") ? Number(getComputedStyle(node).opacity) : 1;
+      return { node, order, z: Number(style.zIndex) || 0, opacity: Number(style.opacity) * own };
     }).sort((a, b) => a.z - b.z || a.order - b.order);
     for (const { node, opacity } of pieces) {
       const { x, y, w, h } = place(node, box2);
@@ -1108,8 +1111,23 @@ var RBViz = (() => {
       if (e.key === "Escape") closeLightbox();
       if (e.key === "ArrowLeft") step(-1);
       if (e.key === "ArrowRight") step(1);
+      if (e.key === "Tab") trapFocus(e);
     });
     return box;
+  }
+  function trapFocus(e) {
+    const stops = [...box.querySelectorAll("button, a[href]")].filter((n) => !n.hidden);
+    const first = stops[0], last = stops.at(-1);
+    if (!box.contains(document.activeElement)) {
+      e.preventDefault();
+      first.focus();
+    } else if (e.shiftKey && document.activeElement === first) {
+      e.preventDefault();
+      last.focus();
+    } else if (!e.shiftKey && document.activeElement === last) {
+      e.preventDefault();
+      first.focus();
+    }
   }
   function step(by) {
     state.i = (state.i + by + state.items.length) % state.items.length;

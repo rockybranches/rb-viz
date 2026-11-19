@@ -88,7 +88,7 @@ export function labeledPin(map, { L, lat = 0, lon = 0, label = "", radius = 7 } 
     setLatLng(newLat, newLon) { marker.setLatLng([newLat, newLon]).addTo(map).bringToFront(); return pin; },
     setLabel(text) {
       marker.unbindTooltip();
-      if (text) marker.bindTooltip(text, { permanent: true, direction: "right", offset: [8, -14], className: "site-label", interactive: false });
+      if (text) marker.bindTooltip(esc(text), { permanent: true, direction: "right", offset: [8, -14], className: "site-label", interactive: false });
       return pin;
     },
     remove() { marker.remove(); return pin; },
@@ -100,10 +100,12 @@ export function labeledPin(map, { L, lat = 0, lon = 0, label = "", radius = 7 } 
 /**
  * A georeferenced image over the map, switched on by a checkbox and faded by a range input
  * (both optional, both yours to place on the page). bounds: [[south, west], [north, east]].
+ * Pass `exportable: true` for an image from another origin that should appear in renderMapPng().
  */
-export function imageOverlay(map, src, bounds, { L, checkbox, slider, opacity = 0.6 } = {}) {
+export function imageOverlay(map, src, bounds, { L, checkbox, slider, opacity = 0.6, exportable = false } = {}) {
   L = leaflet(L);
-  const layer = L.imageOverlay(src, bounds, { opacity: slider ? +slider.value : opacity });
+  // exportable: request the image so that renderMapPng may copy it (its server must allow CORS)
+  const layer = L.imageOverlay(src, bounds, { opacity: slider ? +slider.value : opacity, ...(exportable ? { crossOrigin: "" } : {}) });
   if (checkbox) {
     const sync = () => { if (checkbox.checked) { layer.addTo(map); map.fitBounds(bounds); } else layer.remove(); };
     checkbox.addEventListener("change", sync);

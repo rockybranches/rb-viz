@@ -4,7 +4,8 @@
 // from those same pieces, in the order and at the positions they have on screen. For everything
 // to be included:
 //   - create the map with `preferCanvas: true` (SVG layers are not copied);
-//   - add the basemap with addBasemaps(..., { exportable: true }) so tiles may be read back;
+//   - add the basemap with addBasemaps(..., { exportable: true }) so tiles may be read back,
+//     and image overlays with imageOverlay(..., { exportable: true }) for the same reason;
 //   - legends from legendControl() and labels from labeledPin() are redrawn from their text.
 import { slug } from "../format.js";
 
@@ -55,10 +56,14 @@ export async function renderMapPng(map, { attribution = "© OpenStreetMap contri
   ctx.fillRect(0, 0, box.width, box.height);
 
   // tiles and drawn layers, lowest pane first
-  const pieces = [...container.querySelectorAll("img.leaflet-tile-loaded, .leaflet-pane canvas")]
+  // (an image still loading, or one that failed, has no pixels to copy and is left out)
+  const pieces = [...container.querySelectorAll("img.leaflet-tile-loaded, img.leaflet-image-layer, .leaflet-pane canvas")]
+    .filter((node) => node.tagName !== "IMG" || (node.complete && node.naturalWidth > 0))
     .map((node, order) => {
       const style = getComputedStyle(node.closest(".leaflet-pane"));
-      return { node, order, z: Number(style.zIndex) || 0, opacity: Number(style.opacity) };
+      // an image overlay carries its own opacity, on top of its pane's
+      const own = node.classList.contains("leaflet-image-layer") ? Number(getComputedStyle(node).opacity) : 1;
+      return { node, order, z: Number(style.zIndex) || 0, opacity: Number(style.opacity) * own };
     })
     .sort((a, b) => a.z - b.z || a.order - b.order);
   for (const { node, opacity } of pieces) {
