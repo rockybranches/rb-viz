@@ -64,12 +64,19 @@ async function verify() {
 
 async function purge() {
   const [major, minor] = cdn.version.split(".");
+  let failed = 0;
   for (const range of ["latest", major, `${major}.${minor}`]) {
     for (const name of Object.keys(cdn.files)) {
       const url = `https://purge.jsdelivr.net/gh/rockybranches/rb-viz@${range}/dist/${name}`;
-      const response = await fetch(url).catch((error) => ({ ok: false, status: error.message }));
-      console.log(`${response.ok ? "purged" : `not purged (${response.status})`}  @${range}/dist/${name}`);
+      const response = await fetch(url).catch((error) => ({ ok: false, status: error.cause?.message ?? error.message }));
+      if (!response.ok) failed++;
+      console.log(`${response.ok ? "purged" : `NOT purged (${response.status})`}  @${range}/dist/${name}`);
     }
+  }
+  if (failed) {
+    console.error(`${failed} address(es) were not refreshed and may serve the previous release for up to a week. `
+      + "The release itself is published; run `node scripts/cdn.mjs purge` again.");
+    process.exit(1);
   }
 }
 
