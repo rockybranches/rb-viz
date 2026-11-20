@@ -1,0 +1,30 @@
+{
+  "version": "0.3.0",
+  "base": "https://cdn.jsdelivr.net/gh/rockybranches/rb-viz@0.3.0/dist/",
+  "files": {
+    "rb-viz.css": {
+      "integrity": "sha384-svZEFkJ5xpqcSkRlZEKod49pyZRhQn9im2n0XyDaLkTOc6uJTfzqvE7eCJpILhCS",
+      "bytes": 16347
+    },
+    "rb-viz.esm.js": {
+      "integrity": "sha384-g5RJ+HNTRfz2q7tW5FQomwNVVEbEtRygvcjWVKbUUHZZuUns8mb5XqIb3lhkuINy",
+      "bytes": 47155
+    },
+    "rb-viz.esm.min.js": {
+      "integrity": "sha384-D6oe6jx30FxDA+w83WuqpIN7vcnl0vdaXvdiElTiZuivM42gnjz4OyyB1AHjJGH8",
+      "bytes": 30431
+    },
+    "rb-viz.js": {
+      "integrity": "sha384-SkZyZhyG/kmqUGXABA/JjdHjwFHlYsRRn7OvLKji+3/x8QqujAeAF6cl7q3B7gVz",
+      "bytes": 51888
+    },
+    "rb-viz.min.css": {
+      "integrity": "sha384-NSM3TJoe8+1Q3t2z6YMheVBfBg7ANKMqENmuF4A0aePPyv/lvCrcdsL/ue/8fdHd",
+      "bytes": 12852
+    },
+    "rb-viz.min.js": {
+      "integrity": "sha384-FQm34Shmf0OFxB4jckHWgYcdzL37KXloQ3M02WgjKBl09Zt1+vqhnUit4oB08RUY",
+      "bytes": 30970
+    }
+  }
+}

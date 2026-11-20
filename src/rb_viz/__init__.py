@@ -12,7 +12,7 @@ change global plotting state.
 from .palette import (BANDS, CATEGORICAL, LITHOLOGY, SEQUENTIAL, SERIES, categorical_colors,
                       lithology_color, theme)
 
-__version__ = "0.2.0"
+__version__ = "0.3.0"
 
 __all__ = ["BANDS", "CATEGORICAL", "LITHOLOGY", "SEQUENTIAL", "SERIES", "categorical_colors",
            "lithology_color", "theme", "__version__"]

@@ -1,0 +1,4 @@
+# The CDN serves these files byte for byte and browsers check them against the hashes in
+# dist/cdn.json, so git must never change their line endings.
+dist/** -text
+src/rb_viz/assets/** -text

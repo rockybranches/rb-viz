@@ -1,4 +1,4 @@
-/* rb-viz: https://github.com/rockybranches/rb-viz */
+/* rb-viz 0.3.0: https://github.com/rockybranches/rb-viz */
 var RBViz = (() => {
   var __defProp = Object.defineProperty;
   var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
