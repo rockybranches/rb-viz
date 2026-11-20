@@ -9,7 +9,7 @@ import numpy as np
 import pandas as pd
 
 from .palette import Scheme, lithology_color, theme
-from .style import _series, diverging_cmap, matplotlib_rc
+from .style import _series, diverging_cmap, rc_context
 
 
 def _pyplot():
@@ -33,7 +33,7 @@ def ranked_bars(values: pd.Series, *, xlabel: str = "", title: str = "", limit: 
     if limit is not None:
         shown = shown.iloc[:limit]
     shown = shown.iloc[::-1]  # barh draws the first row at the bottom
-    with plt.rc_context(matplotlib_rc(scheme)):
+    with rc_context(scheme):
         fig, ax = plt.subplots(figsize=figsize or (6, max(2.0, 0.28 * len(shown) + 1.2)))
         ax.barh([str(i) for i in shown.index], shown.to_numpy(), height=0.7, color=_series(scheme)[0])
         ax.grid(axis="y", visible=False)
@@ -61,7 +61,7 @@ def depth_profiles(profiles: Mapping[str, pd.DataFrame], *, depth: str = "DepthT
     plt = _pyplot()
     if not profiles:
         raise ValueError("depth_profiles needs at least one profile")
-    with plt.rc_context(matplotlib_rc(scheme)):
+    with rc_context(scheme):
         fig, axes = plt.subplots(1, len(profiles), figsize=(panel_size[0] * len(profiles), panel_size[1]),
                                  sharey=True, squeeze=False)
         for ax, (name, df) in zip(axes[0], profiles.items()):
@@ -98,7 +98,7 @@ def line_series(frame: pd.DataFrame, *, xlabel: str = "", ylabel: str = "", lege
     if len(frame) > len(colors):
         raise ValueError(f"line_series draws at most {len(colors)} lines; got {len(frame)}")
     t = theme(scheme)
-    with plt.rc_context(matplotlib_rc(scheme)):
+    with rc_context(scheme):
         fig, ax = plt.subplots(figsize=figsize)
         for color, (name, row) in zip(colors, frame.iterrows()):
             ax.plot(frame.columns, row.to_numpy(), color=color, linewidth=2, marker="o", markersize=5, label=str(name))
@@ -131,7 +131,7 @@ def correlation_heatmap(corr: pd.DataFrame, *, title: str = "", annotate: bool |
     n = len(corr)
     annotate = n <= 12 if annotate is None else annotate
     t = theme(scheme)
-    with plt.rc_context(matplotlib_rc(scheme)):
+    with rc_context(scheme):
         side = max(3.5, 0.42 * n + 1.6)
         fig, ax = plt.subplots(figsize=figsize or (side + 0.8, side))
         image = ax.imshow(np.ma.masked_invalid(corr.to_numpy(dtype=float)), vmin=-1, vmax=1, cmap=diverging_cmap(scheme))
@@ -179,7 +179,7 @@ def strip_log(intervals: pd.DataFrame, columns: Sequence[str], *, top: str = "fr
         raise ValueError("strip_log needs at least one column or a category")
     t = theme(scheme)
     series = _series(scheme)[0]
-    with plt.rc_context(matplotlib_rc(scheme)):
+    with rc_context(scheme):
         widths = ([0.5] if category else []) + [1.0] * len(columns)
         fig, axes = plt.subplots(1, n, figsize=figsize or (1.2 + 1.9 * sum(widths), 9), sharey=True,
                                  squeeze=False, gridspec_kw={"width_ratios": widths})

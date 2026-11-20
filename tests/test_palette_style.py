@@ -70,3 +70,18 @@ def test_colormaps_and_plotly_template():
     template = style.plotly_template("dark")
     assert template.layout.paper_bgcolor == rb_viz.theme("dark")["surface"]
     assert template.layout.colorway[0] == rb_viz.theme("dark")["series-1"]
+
+
+def test_rc_context_restores_style_but_keeps_interactive_mode():
+    # Jupyter's inline backend turns interactive mode on while the first figure is made;
+    # if the style context turned it back off, later figures in a notebook would not show.
+    was, grid = matplotlib.is_interactive(), matplotlib.rcParams["axes.grid"]
+    try:
+        matplotlib.interactive(False)
+        with style.rc_context():
+            assert matplotlib.rcParams["axes.spines.top"] is False
+            matplotlib.interactive(True)
+        assert matplotlib.is_interactive()
+        assert matplotlib.rcParams["axes.grid"] == grid
+    finally:
+        matplotlib.interactive(was)

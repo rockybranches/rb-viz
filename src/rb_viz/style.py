@@ -1,4 +1,6 @@
 """The rb-viz look for matplotlib and Plotly: quiet grid, no top or right spine, token colours."""
+from contextlib import contextmanager
+
 from .palette import SEQUENTIAL, SERIES, TOKENS, Scheme, theme
 
 _FONTS = ["system-ui", "Segoe UI", "Helvetica Neue", "Arial", "DejaVu Sans"]
@@ -22,6 +24,26 @@ def matplotlib_rc(scheme: Scheme = "light") -> dict:
         "xtick.labelsize": 9, "ytick.labelsize": 9, "legend.frameon": False, "legend.fontsize": 9,
         "figure.dpi": 110, "savefig.dpi": 200, "savefig.bbox": "tight",
     }
+
+
+@contextmanager
+def rc_context(scheme: Scheme = "light"):
+    """`plt.rc_context(matplotlib_rc(scheme))` that leaves interactive mode alone.
+
+    Interactive mode is itself an rc setting. Jupyter's inline backend turns it on when the
+    first figure is made; plain `plt.rc_context` would turn it back off on the way out, and
+    every later figure in the notebook would then not be shown.
+    """
+    import matplotlib
+    import matplotlib.pyplot as plt
+
+    interactive = matplotlib.is_interactive()
+    try:
+        with plt.rc_context(matplotlib_rc(scheme)):
+            yield
+            interactive = matplotlib.is_interactive()
+    finally:
+        matplotlib.interactive(interactive)
 
 
 def use_style(scheme: Scheme = "light") -> None:

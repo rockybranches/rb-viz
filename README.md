@@ -82,7 +82,7 @@ uv add "rb-viz[all] @ git+https://github.com/rockybranches/rb-viz"   # or [plotl
 | Module | Contents |
 |---|---|
 | `rb_viz.palette` | `SERIES`, `SEQUENTIAL`, `CATEGORICAL`, `BANDS`, `LITHOLOGY`, `theme()`, `categorical_colors()`, `lithology_color()`, `sampled_colors()` |
-| `rb_viz.style` | `use_style()` / `matplotlib_rc()`, `sequential_cmap()`, `diverging_cmap()`, `plotly_template()` |
+| `rb_viz.style` | `use_style()` / `matplotlib_rc()` / `rc_context()`, `sequential_cmap()`, `diverging_cmap()`, `plotly_template()` |
 | `rb_viz.figures` | matplotlib: `strip_log`, `depth_profiles`, `ranked_bars`, `line_series`, `correlation_heatmap` |
 | `rb_viz.interactive` | Plotly: `strip_log`, `cross_plot`, `log_histogram`, `holes_3d`, `stacked_share_bars`, `share_pie`, `correlation_heatmap`, `ranked_bars` |
 | `rb_viz.maps` | folium: `cluster_marker_map` (markers with image popups over clustered surface samples) |
